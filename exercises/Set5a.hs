@@ -352,6 +352,7 @@ prettyPrint = reverse . go
 
 fromBin :: Bin -> Int
 fromBin    End  = 0
+
 fromBin (O bin) =     2 * fromBin bin
 fromBin (I bin) = 1 + 2 * fromBin bin
 

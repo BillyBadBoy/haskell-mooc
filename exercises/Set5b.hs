@@ -221,19 +221,18 @@ set (StepR:ss) b (Node a t1 t2) = Node a           t1 (set ss b t2)
 search :: Eq a => a -> Tree a -> Maybe [Step]
 search val =  go []
   where
-    -- if Empty then search has failed
+    -- we've reached Empty - so search has failed
     go _ Empty = Nothing
 
-                          -- either val is found
+                          -- val is found at this node
     go p (Node a t1 t2) | a == val  = Just $ reverse p
-
-                          -- val not found so search sub-trees
+                          -- val not found - so search sub-trees
                         | otherwise = chooseFirstSuccessful searchL searchR
 
                           where
                             searchL = go (StepL:p) t1
                             searchR = go (StepR:p) t2
 
-    chooseFirstSuccessful (Just p)      _  = Just p
-    chooseFirstSuccessful       _ (Just p) = Just p
-    chooseFirstSuccessful       _       _  = Nothing
+    chooseFirstSuccessful (Just p)       _  = Just p
+    chooseFirstSuccessful       _  (Just p) = Just p
+    chooseFirstSuccessful       _        _  = Nothing

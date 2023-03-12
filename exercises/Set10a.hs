@@ -16,7 +16,7 @@ import Mooc.Todo
 --   take 10 (doublify [0..])  ==>  [0,0,1,1,2,2,3,3,4,4]
 
 doublify :: [a] -> [a]
-doublify = todo
+doublify = foldr (\a as -> a:a:as) []
 
 ------------------------------------------------------------------------------
 -- Ex 2: Implement the function interleave that takes two lists and
@@ -37,7 +37,11 @@ doublify = todo
 --   take 10 (interleave [1..] (repeat 0)) ==> [1,0,2,0,3,0,4,0,5,0]
 
 interleave :: [a] -> [a] -> [a]
-interleave = todo
+interleave     []     [] = []
+interleave (a:as)     [] = a : interleave as []
+interleave     [] (a:as) = a : interleave as []
+interleave (a:as)    bs  = a : interleave bs as  -- swap arguments to take from bs next time
+
 
 ------------------------------------------------------------------------------
 -- Ex 3: Deal out cards. Given a list of players (strings), and a list
@@ -56,7 +60,7 @@ interleave = todo
 -- Hint: remember the functions cycle and zip?
 
 deal :: [String] -> [String] -> [(String,String)]
-deal = todo
+deal as bs = zip bs $ cycle as
 
 ------------------------------------------------------------------------------
 -- Ex 4: Compute a running average. Go through a list of Doubles and
@@ -74,7 +78,16 @@ deal = todo
 
 
 averages :: [Double] -> [Double]
-averages = todo
+averages = go (0,0)
+    where
+        go         _      [] = []
+        go (len, sum) (x:xs) =
+            let
+                len' = len + 1
+                sum' = sum + x
+            in
+                sum' / len' : go (len', sum') xs
+
 
 ------------------------------------------------------------------------------
 -- Ex 5: Given two lists, xs and ys, and an element z, generate an
@@ -92,7 +105,7 @@ averages = todo
 --   take 10 (alternate [1,2] [3,4,5] 0) ==> [1,2,0,3,4,5,0,1,2,0]
 
 alternate :: [a] -> [a] -> a -> [a]
-alternate xs ys z = todo
+alternate xs ys z = xs ++ [z] ++ ys ++ [z] ++ alternate xs ys z
 
 ------------------------------------------------------------------------------
 -- Ex 6: Check if the length of a list is at least n. Make sure your
@@ -104,7 +117,7 @@ alternate xs ys z = todo
 --   lengthAtLeast 10 [0..]  ==> True
 
 lengthAtLeast :: Int -> [a] -> Bool
-lengthAtLeast = todo
+lengthAtLeast n xs = n == length (take n xs)
 
 ------------------------------------------------------------------------------
 -- Ex 7: The function chunks should take in a list, and a number n,
@@ -122,7 +135,10 @@ lengthAtLeast = todo
 --   take 4 (chunks 3 [0..]) ==> [[0,1,2],[1,2,3],[2,3,4],[3,4,5]]
 
 chunks :: Int -> [a] -> [[a]]
-chunks = todo
+chunks 0  _                      = repeat []
+chunks n []                      = []
+chunks n xs | lengthAtLeast n xs = take n xs : chunks n (tail xs)
+            | otherwise          = []
 
 ------------------------------------------------------------------------------
 -- Ex 8: Define a newtype called IgnoreCase, that wraps a value of
@@ -138,7 +154,12 @@ chunks = todo
 --   ignorecase "abC" == ignorecase "ABc"  ==>  True
 --   ignorecase "acC" == ignorecase "ABc"  ==>  False
 
-ignorecase = todo
+newtype IgnoreCase = IgnoreCase String
+
+ignorecase = IgnoreCase
+
+instance Eq IgnoreCase where
+  (IgnoreCase s1) == (IgnoreCase s2) = map toLower s1 == map toLower s2
 
 ------------------------------------------------------------------------------
 -- Ex 9: Here's the Room type and some helper functions from the
@@ -182,4 +203,10 @@ play room (d:ds) = case move room d of Nothing -> [describe room]
                                        Just r -> describe room : play r ds
 
 maze :: Room
-maze = todo
+maze = m1
+    where
+        m1 = Room "Maze"                  [("Left", m2), ("Right", m3)]
+
+        m2 = Room "Deeper in the maze"    [("Left", m3), ("Right", m1)]
+
+        m3 = Room "Elsewhere in the maze" [("Left", m1), ("Right", m2)]

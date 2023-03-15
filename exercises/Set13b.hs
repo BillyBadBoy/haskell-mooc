@@ -10,8 +10,6 @@ import Control.Monad.Trans.State
 import Data.Char
 import Data.IORef
 import Data.List
-import Set2a (years)
-
 
 ------------------------------------------------------------------------------
 -- Ex 1: implement the function ifM, that takes three monadic

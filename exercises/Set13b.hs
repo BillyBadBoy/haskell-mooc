@@ -383,7 +383,7 @@ instance Monad SL where
 -- An example of how mkCounter works in GHCi:
 --
 --  *Set11b> (inc,get) <- mkCounter
---  *Set11b> inc
+--  *Set11b> inc 
 --  *Set11b> inc
 --  *Set11b> get
 --  2
@@ -402,5 +402,5 @@ mkCounter = do
   let inc = do i <- readIORef c
                writeIORef c (i + 1)
 
-  return (inc,get)
+  return (inc, get)
 

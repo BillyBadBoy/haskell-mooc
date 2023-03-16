@@ -14,6 +14,8 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
+import Data.Text.Lazy.Builder (fromLazyText)
+import Data.Text.Lazy (toStrict)
 
 ------------------------------------------------------------------------------
 -- Ex 1: Greet a person. Given the name of a person as a Text, return
@@ -28,10 +30,11 @@ import qualified Data.ByteString.Lazy as BL
 --  greetText (T.pack "Benedict Cumberbatch") ==> "Hello, Benedict Cumber...!"
 
 greetText :: T.Text -> T.Text
-greetText = todo
+greetText s | T.length s <= 15 = T.pack "Hello, " <>           s <> T.pack    "!"
+            | otherwise        = T.pack "Hello, " <> T.take 15 s <> T.pack "...!"
 
 ------------------------------------------------------------------------------
--- Ex 2: Capitalize every second word of a Text.
+-- Ex 2: Capitalize every second word of a Text. 
 --
 -- Examples:
 --   shout (T.pack "hello how are you")
@@ -40,7 +43,11 @@ greetText = todo
 --     ==> "WORD"
 
 shout :: T.Text -> T.Text
-shout = todo
+shout s =  T.unwords $ go True $ T.words s
+    where
+        go     _     [] = []
+        go True  (w:ws) = T.toUpper w : go False ws
+        go False (w:ws) =           w : go True  ws
 
 ------------------------------------------------------------------------------
 -- Ex 3: Find the longest sequence of a single character repeating in
@@ -51,7 +58,11 @@ shout = todo
 --   longestRepeat (T.pack "aabbbbccc") ==> 4
 
 longestRepeat :: T.Text -> Int
-longestRepeat = todo
+longestRepeat t = go (T.uncons t)
+    where
+        go  Nothing     = 0
+        go (Just (c,_)) = max headLen (longestRepeat $ T.drop headLen t)
+            where headLen = T.length $ T.takeWhile (==c) t
 
 ------------------------------------------------------------------------------
 -- Ex 4: Given a lazy (potentially infinite) Text, extract the first n
@@ -64,7 +75,7 @@ longestRepeat = todo
 --   takeStrict 15 (TL.pack (cycle "asdf"))  ==>  "asdfasdfasdfasd"
 
 takeStrict :: Int64 -> TL.Text -> T.Text
-takeStrict = todo
+takeStrict n t = toStrict $ TL.take n t
 
 ------------------------------------------------------------------------------
 -- Ex 5: Find the difference between the largest and smallest byte
@@ -72,11 +83,21 @@ takeStrict = todo
 --
 -- Examples:
 --   byteRange (B.pack [1,11,8,3]) ==> 10
---   byteRange (B.pack []) ==> 0
---   byteRange (B.pack [3]) ==> 0
+--   byteRange (B.pack [])         ==> 0
+--   byteRange (B.pack [3])        ==> 0
 
 byteRange :: B.ByteString -> Word8
-byteRange = todo
+byteRange bs = maxW - minW
+    where
+        (maxW, minW) = if null ws then (0,0) else (maximum ws, minimum ws)
+
+        ws = toList bs
+
+        toList ws = case B.uncons ws of
+            Nothing     -> []
+            Just (w,ws) -> w:toList ws
+
+
 
 ------------------------------------------------------------------------------
 -- Ex 6: Compute the XOR checksum of a ByteString. The XOR checksum of
@@ -97,7 +118,7 @@ byteRange = todo
 --   xorChecksum (B.pack []) ==> 0
 
 xorChecksum :: B.ByteString -> Word8
-xorChecksum = todo
+xorChecksum = B.foldl' xor 0
 
 ------------------------------------------------------------------------------
 -- Ex 7: Given a ByteString, compute how many UTF-8 characters it
@@ -114,8 +135,10 @@ xorChecksum = todo
 --   countUtf8Chars (B.drop 1 (encodeUtf8 (T.pack "åäö"))) ==> Nothing
 
 countUtf8Chars :: B.ByteString -> Maybe Int
-countUtf8Chars = todo
-
+countUtf8Chars s = case decodeUtf8' s of
+    Right text -> Just $ T.length text
+    _          -> Nothing     
+    
 ------------------------------------------------------------------------------
 -- Ex 8: Given a (nonempty) strict ByteString b, generate an infinite
 -- lazy ByteString that consists of b, reversed b, b, reversed b, and
@@ -126,5 +149,7 @@ countUtf8Chars = todo
 --     ==> [0,1,2,2,1,0,0,1,2,2,1,0,0,1,2,2,1,0,0,1]
 
 pingpong :: B.ByteString -> BL.ByteString
-pingpong = todo
+pingpong bs = bAndRevB
+    where
+        bAndRevB = BL.fromStrict bs <> BL.fromStrict (B.reverse bs) <> bAndRevB
 

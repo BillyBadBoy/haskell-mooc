@@ -54,7 +54,7 @@ shout s =  T.unwords $ go True $ T.words s
 -- a Text, and return its length.
 --
 -- Examples:
---   longestRepeat (T.pack "") ==> 0
+--   longestRepeat (T.pack "")          ==> 0
 --   longestRepeat (T.pack "aabbbbccc") ==> 4
 
 longestRepeat :: T.Text -> Int
